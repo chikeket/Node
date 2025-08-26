@@ -1,0 +1,101 @@
+select ag.*
+from (
+select a.item_code,
+                    a.item_name,
+                    a.item_category,
+                    a.sale_price,
+                    a.star_point,
+                    MIN(b.item_image) "item_image"
+                    from tb_item a
+                    join tb_item_image b
+                    on a.item_code = b.item_code
+                    --where sale_price>0     
+                    group by a.item_code, a.item_name, a.item_category, a.sale_price, a.star_point
+                    order by a.star_point desc
+                    ) ag
+                    where rownum<=4;
+                    
+select *
+from tb_item;
+
+select a.item_code,
+                    a.item_name,                    
+                    a.price,
+                    a.star_point,
+                    MIN(b.item_image) "item_image",
+                    COUNT(c.item_code) "review_cnt"
+                    from tb_item a
+                    join tb_item_image b
+                    on a.item_code = b.item_code
+                    join tb_item_review c
+                    on b.item_code = c.item_code
+                    where item_category = 'TV'     
+                    group by a.item_code, a.item_name, a.price, a.star_point, c.item_code;
+                    
+select *
+from tb_item_image;
+
+select *
+from tb_menu;
+
+select *
+from tb_item_review;
+
+select *
+from tb_item;
+
+select item_code,
+        COUNT(item_code)
+from tb_item_review
+group by item_code;
+
+
+
+select ag.*
+           from (
+                    select a.item_code,
+                    a.item_name,
+                    a.item_category,
+                    a.sale_price,
+                    a.star_point,
+                    MIN(b.item_image) "item_image",
+                    COUNT(c.item_code) "review_cnt"
+                    from tb_item a
+                    join tb_item_image b
+                    on a.item_code = b.item_code
+                    join tb_item_review c
+                    on b.item_code = c.item_code
+                    where item_category = 'TV'    
+                    group by a.item_code, a.item_name, a.item_category, a.sale_price, a.star_point, c.item_code
+                    order by a.star_point desc
+               ) ag
+  where rownum<=4;
+  
+  select ag.*
+       from (  
+             select a.item_code,
+                    a.item_name,
+                    a.item_category,
+                    a.sale_price,
+                    a.star_point,
+                    MIN(b.item_image) "item_image",
+                    COUNT(c.item_code) "review_cnt"
+                    from tb_item a
+                    join tb_item_image b
+                    on a.item_code = b.item_code
+                    join tb_item_review c
+                    on b.item_code = c.item_code
+                    where sale_price>0     
+                    group by a.item_code, a.item_name, a.item_category, a.sale_price, a.star_point, c.item_code
+             ) ag
+  where rownum<=4;
+
+
+
+
+
+
+
+
+
+
