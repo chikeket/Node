@@ -1,17 +1,7 @@
 //app.js
 const express = require("express");
-const mysql = require("mysql2");
 const parser = require("body-parser");
-
-// connect pool 생성.
-const pool = mysql.createPool({
-  host: "127.0.0.1",
-  port: 3306,
-  user: "dev01",
-  password: "dev01",
-  database: "dev",
-  connectionLimit: 10,
-});
+const sql = require("./sql");
 
 const app = express();
 app.use(parser.urlencoded()); // x-www-form-urlencoded
@@ -22,80 +12,59 @@ app.get("/", (req, resp) => {
 });
 
 // 고객목록.
-app.get("/customers", (req, resp) => {
-  //connection = pool.getConnection();
-  pool.getConnection((err, connection) => {
-    // getConnection => connection 객체 획득.
-    if (err) {
-      console.log(err);
-      return;
-    }
-    connection.query("select * from customers", (err, results) => {
-      if (err) {
-        console.log(err);
-        resp.send("쿼리실행중 에러");
-        return;
-      }
-      console.log(results);
-      //resp.send("실행완료");
-      resp.json(results);
-      connection.release(); // connetion => pool 환원.
-    }); //end of query().
-  }); //end of getConnection().
+app.get("/customers", async (req, resp) => {
+  try {
+    let customerList = await sql.execute("select * from customers");
+    console.log(customerList);
+    resp.json(customerList);
+  } catch {
+    console.log(err);
+    resp.json({ retCode: "Error" });
+  }
 });
 
 // 등록.
-app.post("/customer", (req, resp) => {
+app.post("/customer", async (req, resp) => {
   console.log(req.body.param);
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    connection.query(
-      //"insert into customers(name, email, phone)values(?, ?, ?)",
-      "insert into customers set ?",
-      [req.body.param],
-      (err, results) => {
-        if (err) {
-          console.log(err);
-          resp.send("쿼리실행중 에러");
-          return;
-        }
-        console.log(results);
-        //resp.send("실행완료");
-        resp.json(results);
-        connection.release(); // connetion => pool 환원.
-      }
-    ); //end of query().
-  }); //end of getConnection().
+  try {
+    let result = await sql.execute(
+      "insert into customers set ?", //
+      [req.body.param]
+    );
+    console.log(result);
+    resp.json(result);
+  } catch {
+    console.log(err);
+    resp.json({ retCode: "Error" });
+  }
 });
 
 // 삭제.
-app.delete("/customer/:id", (req, resp) => {
+app.delete("/customer/:id", async (req, resp) => {
   console.log(req.params);
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    connection.query(
-      //"insert into customers(name, email, phone)values(?, ?, ?)",
-      "delete from customers where ?",
-      [req.params],
-      (err, results) => {
-        if (err) {
-          console.log(err);
-          resp.send("쿼리실행중 에러");
-          return;
-        }
-        console.log(results);
-        //resp.send("실행완료");
-        resp.json(results);
-        connection.release(); // connetion => pool 환원.
-      }
-    ); //end of query().
-  }); //end of getConnection().
+  try {
+    let result = await sql.execute(
+      "delete from customers where ?", //
+      [req.params]
+    );
+    resp.json(result);
+  } catch {
+    resp.json({ retCode: "Error" });
+  }
+});
+
+// 수정.
+app.put("/customer", async (req, resp) => {
+  console.log(req.body);
+  try {
+    let result = await sql.execute(
+      "update customers set ? where id = ?", //
+      [req.body.param, req.body.id]
+    );
+    resp.json(result);
+  } catch {
+    resp.json({ retCode: "Error" });
+  }
 });
 
 app.listen(3000, () => {
