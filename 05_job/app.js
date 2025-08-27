@@ -1,8 +1,10 @@
 const express = require("express");
+//환경변수를 이용하려면 변수가 적용된 파일보다 상위에서 로드가 되게 코드를 작성해야한다
 require("dotenv").config({
   path: "./.env",
 });
 const nodemail = require("./nodemail");
+const excel = require("./excel");
 // const process = require("process");
 
 // console.log(process.env);
@@ -14,7 +16,7 @@ app.get("/", (req, resp) => {
   resp.send("/");
 });
 app.get("/mail", (req, resp) => {
-  resp.send(`<form action="mail" method="post">
+  resp.send(`<form action="mail" method="post" enctype="multipart/form-data">
       <table>
         <tr>
           <th>보내는이:</th>
@@ -34,6 +36,7 @@ app.get("/mail", (req, resp) => {
           <th>내용:</th>
           <td><textarea name="content"></textarea></td>
         </tr>
+        
         <tr>
           <td colspan="2" align="center">
             <input type="submit" value="메일보내기" name="" id="" />
@@ -53,6 +56,12 @@ app.post("/mail", (req, resp) => {
   };
   nodemail.mailSend(data);
   resp.send("done");
+});
+
+// "/excel_down => customers 테이블의 데이터를 logs/customer2.xlsx로 저장"
+app.get("/excel_down", (req, resp) => {
+  excel.db_to_excel("customers2");
+  resp.send("✅파일 저장 완료");
 });
 
 app.listen(3000, () => {
