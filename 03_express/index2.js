@@ -16,10 +16,20 @@ const storage = multer.diskStorage({
     cb(null, "uploads/file/");
   },
   filename: (req, file, cb) => {
-    const originalname = Buffer.from(file.originalname, "latin1").toString(
-      "utf8"
-    );
-    cb(null, new Date().valueOf() + originalname); //2025-08-20-HH:MM:SS+홍길동.jpg
+    const originalname = Buffer.from(file.originalname, "latin1")//
+      .toString("utf8");
+    // 날짜 포맷 함수
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hour = String(now.getHours()).padStart(2, "0");
+    const min = String(now.getMinutes()).padStart(2, "0");
+    const sec = String(now.getSeconds()).padStart(2, "0");
+
+    const formatted = `${year}-${month}-${day}-${hour}:${min}:${sec}`;
+
+    cb(null, `${formatted} ${originalname}`); //2025-08-20-HH:MM:SS+홍길동.jpg
   },
 });
 const uploads = multer({
