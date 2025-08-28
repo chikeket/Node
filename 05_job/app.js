@@ -16,7 +16,7 @@ app.get("/", (req, resp) => {
   resp.send("/");
 });
 app.get("/mail", (req, resp) => {
-  resp.send(`<form action="mail" method="post" enctype="multipart/form-data">
+  resp.send(`<form action="mail" method="post" >
       <table>
         <tr>
           <th>보내는이:</th>
@@ -36,7 +36,10 @@ app.get("/mail", (req, resp) => {
           <th>내용:</th>
           <td><textarea name="content"></textarea></td>
         </tr>
-        
+        <tr>
+          <th>파일업로드:</th>
+          <td><input type="file" name="filename" id="" /></td>
+        </tr>
         <tr>
           <td colspan="2" align="center">
             <input type="submit" value="메일보내기" name="" id="" />
