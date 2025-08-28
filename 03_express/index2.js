@@ -27,7 +27,7 @@ const storage = multer.diskStorage({
     const min = String(now.getMinutes()).padStart(2, "0");
     const sec = String(now.getSeconds()).padStart(2, "0");
 
-    const formatted = `${year}-${month}-${day}-${hour}:${min}:${sec}`;
+    const formatted = `${year}-${month}-${day}--${hour}_${min}_${sec}`;
 
     cb(null, `${formatted} ${originalname}`); //2025-08-20-HH:MM:SS+홍길동.jpg
   },
@@ -92,11 +92,13 @@ app.get("/bookList", (req, resp) => {
 });
 
 // 에러처리.
-app.use((err, req, resp) => {
+app.use((err, req, resp, next) => {
   if (err instanceof multer.MulterError) {
     resp.status(400).send("Multer에러 발생" + err);
   } else if (err) {
     resp.status(400).send(err);
+  } else {
+    next()
   }
 });
 
