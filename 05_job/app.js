@@ -4,12 +4,39 @@ require("dotenv").config({
   path: "./.env",
 });
 const nodemail = require("./nodemail");
+const multer = require("multer");
 const excel = require("./excel");
 // const process = require("process");
 
 // console.log(process.env);
 const app = express();
 app.use(express.urlencoded()); //요청정보에 있는 x-www-form-urlencoded
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/file/");
+  },
+  filename: (req, file, cb) => {
+    const originalname = Buffer.from(file.originalname, "latin1")//
+      .toString("utf8");
+    // 날짜 포맷 함수
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hour = String(now.getHours()).padStart(2, "0");
+    const min = String(now.getMinutes()).padStart(2, "0");
+    const sec = String(now.getSeconds()).padStart(2, "0");
+
+    const formatted = `${year}-${month}-${day}--${hour}_${min}_${sec}`;
+
+    cb(null, `${formatted} ${originalname}`); //2025-08-20-HH:MM:SS+홍길동.jpg
+  },
+});
+
+const uploads = multer({
+  storage: storage,
+});
 
 // 라우팅.
 app.get("/", (req, resp) => {
@@ -36,7 +63,10 @@ app.get("/mail", (req, resp) => {
           <th>내용:</th>
           <td><textarea name="content"></textarea></td>
         </tr>
-        
+        <tr>
+          <th>파일업로드:</th>
+          <td><input type="file" name="filename" id="" /></td>
+        </tr>
         <tr>
           <td colspan="2" align="center">
             <input type="submit" value="메일보내기" name="" id="" />
@@ -46,13 +76,24 @@ app.get("/mail", (req, resp) => {
       
     </form>`);
 });
-app.post("/mail", (req, resp) => {
-  console.log(req.body);
+app.post("/mail", uploads.single("filename"), (req, resp) => {
+  console.log(req.body);   // 이제 sender, receiver, subject, content 다 찍힘
+  console.log(req.file);   // 업로드된 파일 정보 찍힘
+
+  let file = req.file; // multer가 넣어주는 파일 객체
   let data = {
     from: req.body.sender,
     to: req.body.receiver,
     subject: req.body.subject,
     text: req.body.content,
+    attachments: file
+      ? [
+        {
+          filename: file.originalname, // 메일에 표시될 파일명
+          path: file.path,             // 서버에 저장된 파일 경로 (여기서 path가 생김!)
+        },
+      ]
+      : [],
   };
   nodemail.mailSend(data);
   resp.send("done");

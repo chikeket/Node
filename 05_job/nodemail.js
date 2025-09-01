@@ -12,6 +12,7 @@ let transporter = nodemail.createTransport({
 });
 
 const mailSend = (data) => {
+  console.log(data)
   transporter.sendMail(data, (err, result) => {
     if (err) {
       console.log(err);
