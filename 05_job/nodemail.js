@@ -18,6 +18,7 @@ const mailSend = (data) => {
       return err;
     }
     console.log(result.messageId + "를 확인하세요.");
+
     return result.messageId;
   });
 };
