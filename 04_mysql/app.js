@@ -2,10 +2,12 @@
 const express = require("express");
 const parser = require("body-parser");
 const sql = require("./sql");
+const cors = require("cors");
 
 const app = express();
 app.use(parser.urlencoded()); // x-www-form-urlencoded
 app.use(parser.json());
+app.use(cors());
 
 app.get("/", (req, resp) => {
   resp.send("/ 실행");
